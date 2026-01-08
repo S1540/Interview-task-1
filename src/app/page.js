@@ -29,16 +29,10 @@ export default function Home() {
                 Users
               </Link>
               <Link
-                href="/about"
+                href="/products"
                 className="text-gray-700 hover:text-indigo-600 transition"
               >
-                About
-              </Link>
-              <Link
-                href="/contact"
-                className="text-gray-700 hover:text-indigo-600 transition"
-              >
-                Contact
+                Products
               </Link>
             </div>
 
