@@ -13,6 +13,12 @@ import {
   ButtonGroup,
   Button,
   CircularProgress,
+  Grid,
+  Card,
+  CardMedia,
+  CardContent,
+  Typography,
+  Box,
 } from "@mui/material";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -28,7 +34,7 @@ export default function ProductsPage() {
   const limit = 10;
   const totalPages = Math.ceil(total / limit);
 
-  // Fetch products (API-based search + pagination)
+  // Fetch products (API-based search orr pagination)
   useEffect(() => {
     fetchProducts({
       page: currentPage,
@@ -37,7 +43,7 @@ export default function ProductsPage() {
     });
   }, [currentPage, searchQuery, fetchProducts]);
 
-  // Reset page when search or category changes (UX fix)
+  // Reset page on search
   useEffect(() => {
     setCurrentPage(1, searchQuery, selectedCategory);
   }, [searchQuery, selectedCategory]);
@@ -69,127 +75,187 @@ export default function ProductsPage() {
 
         <Paper elevation={2} className="p-6 mb-6">
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <Grid container spacing={3} className="mb-6">
             {/* Search */}
-            <TextField
-              fullWidth
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">🔍</InputAdornment>
-                ),
-              }}
-            />
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <svg
+                        className="w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                      </svg>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
 
             {/* Category */}
-            <FormControl fullWidth>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={selectedCategory}
-                label="Category"
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                {categories.map((category) => (
-                  <MenuItem key={category} value={category}>
-                    {category}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </div>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>Category</InputLabel>
+                <Select
+                  value={selectedCategory}
+                  label="Category"
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                  {categories.map((category) => (
+                    <MenuItem key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
 
           {/* Loading */}
           {loading && (
-            <div className="flex justify-center py-12">
-              <CircularProgress />
-            </div>
+            <Box className="flex justify-center py-12">
+              <CircularProgress size={50} />
+            </Box>
           )}
 
           {/* Products Grid */}
           {!loading && (
             <>
-              <p className="text-gray-600 mb-4">
+              <Typography variant="body1" className="!text-gray-600 !mb-4">
                 Showing{" "}
                 <span className="font-semibold">{finalProducts.length}</span>{" "}
                 products
-              </p>
+              </Typography>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <Grid container spacing={3}>
                 {finalProducts.map((product) => (
-                  <Link key={product.id} href={`/products/${product.id}`}>
-                    <div className="bg-white rounded-lg border hover:shadow-lg transition cursor-pointer">
-                      {/* Image */}
-                      <div className="relative h-48 bg-gray-100">
-                        <img
-                          src={product.thumbnail}
-                          alt={product.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <Chip
-                          label={product.category}
-                          size="small"
-                          className="!absolute !top-2 !right-2 !bg-white"
-                        />
-                      </div>
+                  <Grid item xs={12} sm={6} md={4} key={product.id}>
+                    <Link
+                      href={`/products/${product.id}`}
+                      className="no-underline"
+                    >
+                      <Card className="h-full hover:shadow-xl transition-all duration-300 cursor-pointer group flex flex-col">
+                        {/* Image - Fixed Height */}
+                        <Box className="relative overflow-hidden h-64 bg-gray-100 flex items-center justify-center">
+                          <CardMedia
+                            component="img"
+                            image={product.thumbnail}
+                            alt={product.title}
+                            className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-300"
+                          />
+                          <Chip
+                            label={product.category}
+                            size="small"
+                            className="!absolute !top-3 !right-3 !bg-white !text-gray-700 !font-medium !capitalize !shadow-md"
+                          />
+                        </Box>
 
-                      {/* Info */}
-                      <div className="p-4">
-                        <h3 className="font-semibold mb-2 line-clamp-2">
-                          {product.title}
-                        </h3>
+                        {/* Info */}
+                        <CardContent className="flex-1 flex flex-col">
+                          <Typography
+                            variant="h6"
+                            className="!font-semibold !text-gray-900 !mb-2 !line-clamp-2 !min-h-14 group-hover:!text-indigo-600 transition-colors"
+                          >
+                            {product.title}
+                          </Typography>
 
-                        <Rating
-                          value={product.rating}
-                          precision={0.1}
-                          size="small"
-                          readOnly
-                        />
+                          <Box className="flex items-center gap-2 mb-3">
+                            <Rating
+                              value={product.rating}
+                              precision={0.1}
+                              size="small"
+                              readOnly
+                            />
+                            <Typography
+                              variant="caption"
+                              className="!text-gray-500"
+                            >
+                              ({product.rating})
+                            </Typography>
+                          </Box>
 
-                        <div className="flex justify-between mt-2">
-                          <p className="font-bold text-indigo-600">
-                            ${product.price}
-                          </p>
-                          <span className="text-sm text-gray-500">
-                            {product.category}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                          <Box className="flex justify-between items-center mt-auto">
+                            <Typography
+                              variant="h5"
+                              className="!font-bold !text-indigo-600"
+                            >
+                              ${product.price}
+                            </Typography>
+                            <Chip
+                              label={product.category}
+                              size="small"
+                              className="!bg-indigo-50 !text-indigo-700 !capitalize !font-medium"
+                            />
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  </Grid>
                 ))}
-              </div>
+              </Grid>
 
               {/* No Data */}
               {finalProducts.length === 0 && (
-                <p className="text-center text-gray-500 py-10">
-                  No products found
-                </p>
+                <Box className="text-center py-12">
+                  <svg
+                    className="w-20 h-20 text-gray-300 mx-auto mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                    />
+                  </svg>
+                  <Typography variant="h6" className="!text-gray-500 !mb-2">
+                    No products found
+                  </Typography>
+                  <Typography variant="body2" className="!text-gray-400">
+                    Try adjusting your search or filters
+                  </Typography>
+                </Box>
               )}
 
               {/* Pagination */}
-              <div className="flex justify-center mt-6">
-                <ButtonGroup variant="contained">
-                  <Button
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((p) => p - 1)}
-                  >
-                    Prev
-                  </Button>
+              {finalProducts.length > 0 && (
+                <Box className="flex justify-center mt-8">
+                  <ButtonGroup variant="contained" size="large">
+                    <Button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage((p) => p - 1)}
+                    >
+                      Prev
+                    </Button>
 
-                  <Button disabled>
-                    {currentPage} / {totalPages}
-                  </Button>
+                    <Button disabled className="!min-w-32">
+                      {currentPage} / {totalPages}
+                    </Button>
 
-                  <Button
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage((p) => p + 1)}
-                  >
-                    Next
-                  </Button>
-                </ButtonGroup>
-              </div>
+                    <Button
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage((p) => p + 1)}
+                    >
+                      Next
+                    </Button>
+                  </ButtonGroup>
+                </Box>
+              )}
             </>
           )}
         </Paper>
